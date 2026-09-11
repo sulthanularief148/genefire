@@ -1,0 +1,18 @@
+node_modules/
+.next/
+.next-audit/
+out/
+next-env.d.ts
+.env*
+*.tsbuildinfo
+public/models/
+public/renders/
+3d-source/**/*.blend
+3d-source/**/*.blend1
+3d-source/**/*.skp
+*.hdr
+
+# playwright
+test-results/
+playwright-report/
+tests/screenshots/

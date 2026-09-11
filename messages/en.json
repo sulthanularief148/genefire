@@ -1,0 +1,199 @@
+{
+  "brand": {
+    "company": "ALMAGHRABI for Trading Services",
+    "name": "ALMAGHRABI",
+    "descriptor": "for Trading Services",
+    "role": "Authorized Agent in Saudi Arabia",
+    "tagline": "Where Innovation Meets Fire Safety"
+  },
+  "nav": {
+    "products": "Products",
+    "applications": "Applications",
+    "coverage": "Coverage calculator",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "cta": {
+    "primary": "Size your enclosure",
+    "secondary": "Talk to a specialist"
+  },
+  "a11y": {
+    "skip": "Skip to content",
+    "progress": "Page progress",
+    "nav": "Main navigation",
+    "language": "Language"
+  },
+  "hero": {
+    "principal": "<latin>GENEFIRE</latin> aerosol fire suppression",
+    "eyebrow": "Authorized agent in Saudi Arabia",
+    "h1": "Where innovation meets <accent>fire safety</accent>",
+    "sub": "Condensed aerosol suppression that mounts inside the space it protects — no piping, no nozzles, no pressurised cylinders.",
+    "scroll": "Scroll"
+  },
+  "problem": {
+    "1": "Fire starts inside the cabinet, not outside it.",
+    "2": "Sprinklers arrive too late, and ruin what is left.",
+    "3": "Gas systems need a plant room and a pipe network that was never built here."
+  },
+  "activation": {
+    "line": "Displaces no oxygen. Leaves no residue. Needs no piping.",
+    "caption": "The generator releases an ultra-fine dry aerosol that floods the volume and interrupts the chemistry of combustion."
+  },
+  "series": {
+    "px": {
+      "name": "PX Series",
+      "sub": "Manual activation, instant protection"
+    },
+    "sx_small": {
+      "name": "Small-Scale Series",
+      "sub": "Scalable protection for electrical cabinets & enclosures"
+    },
+    "sx_industrial": {
+      "name": "Industrial Series",
+      "sub": "Stainless-steel fire protection for large enclosures"
+    }
+  },
+  "spec": {
+    "agc": "AGC",
+    "total": "Total weight",
+    "volume": "Protected volume",
+    "time": "Discharge time",
+    "size": "Dimensions"
+  },
+  "unit": {
+    "g": "g",
+    "m3": "m³",
+    "s": "s",
+    "mm": "mm",
+    "m": "m"
+  },
+  "product": {
+    "explode": "Exploded view",
+    "datasheet": "Download datasheet",
+    "hotspot": {
+      "actuator": "Actuator",
+      "charge": "AGC charge",
+      "outlet": "Aerosol outlet",
+      "bracket": "Mounting bracket"
+    }
+  },
+  "calc": {
+    "title": "What volume do you need to protect?",
+    "length": "Length",
+    "width": "Width",
+    "height": "Height",
+    "volume": "Volume",
+    "required": "Agent required",
+    "application": "Application",
+    "result": "Recommended unit",
+    "next": "Next size up",
+    "multiple": "{n} units are required to cover this volume.",
+    "rule": "Every 100 g of agent protects 5 m³.",
+    "disclaimer": "Indicative sizing only. Final design must account for enclosure leakage, internal obstruction and the applicable civil defence requirements.",
+    "cta": "Send these figures to our team"
+  },
+  "app": {
+    "military": "Military",
+    "industry": "Industry",
+    "power": "Power",
+    "railway": "Railway",
+    "datacenter": "Data centres",
+    "laboratory": "Laboratory"
+  },
+  "cmp": {
+    "title": "Why condensed aerosol?",
+    "occupied": "Safe in occupied spaces",
+    "piping": "Requires piping and nozzles",
+    "cost": "Installed cost",
+    "residue": "Residue",
+    "gwp": "Global warming potential",
+    "space": "Space required",
+    "retrofit": "Retrofits into an existing cabinet",
+    "col": {
+      "aerosol": "Condensed aerosol",
+      "halocarbon": "Halocarbon clean agent",
+      "inert": "Inert gas",
+      "sprinkler": "Water sprinkler"
+    },
+    "val": {
+      "yes": "Yes",
+      "no": "No",
+      "none": "None",
+      "low": "Low",
+      "high": "High",
+      "minimal": "Minimal",
+      "plantroom": "Plant room",
+      "water": "Water",
+      "restricted": "Restricted",
+      "nondamaging": "Non-damaging"
+    },
+    "note": "Indicative comparison. The aerosol column is taken from the GENEFIRE brochure; the other columns are general characteristics of those systems and require technical sign-off before publication."
+  },
+  "contact": {
+    "title": "Talk to the Almaghrabi team",
+    "name": "Name",
+    "company": "Company",
+    "phone": "Phone",
+    "message": "Details",
+    "submit": "Send",
+    "address": "Riyadh — Othman Bin Affan Road — Al Nuzha District",
+    "addressLabel": "Address",
+    "maps": "Open in Maps",
+    "subject": "Website enquiry",
+    "sendNote": "Opens your email app with your enquiry written, ready to send.",
+    "email": "Email"
+  },
+  "ui": {
+    "drag": "Drag to rotate"
+  },
+  "about": {
+    "eyebrow": "About us",
+    "lead": "The authorized agent in Saudi Arabia for <latin>GENEFIRE</latin> aerosol fire suppression systems, based in Riyadh.",
+    "principalTitle": "About <latin>GENEFIRE</latin>",
+    "principal": "<latin>GENEFIRE</latin> is a revolutionary aerosol fire suppression system designed for fast, effective and safe fire control. Compact, lightweight and easy to install, it is the ideal solution for fire protection.",
+    "fact": {
+      "series": "Product series",
+      "models": "Models",
+      "range": "Protection per unit"
+    },
+    "networkTitle": "The <latin>GENEFIRE</latin> network",
+    "networkSub": "<latin>GENEFIRE</latin> is present in Taiwan and India, and is represented in Saudi Arabia by ALMAGHRABI for Trading Services, its authorized agent.",
+    "node": {
+      "genefire": {
+        "name": "GENEFIRE",
+        "place": "Taiwan",
+        "role": "Manufacturer"
+      },
+      "india": {
+        "name": "GeneFire India",
+        "place": "India",
+        "role": "Regional presence"
+      },
+      "almaghrabi": {
+        "name": "ALMAGHRABI",
+        "place": "Riyadh, Saudi Arabia",
+        "role": "Authorized agent"
+      }
+    },
+    "featuresTitle": "Key product features"
+  },
+  "section": {
+    "about": "About",
+    "hero": "Start",
+    "problem": "The problem",
+    "activation": "Activation",
+    "series": "Series",
+    "products": "Products",
+    "coverage": "Coverage",
+    "applications": "Applications",
+    "comparison": "Why aerosol",
+    "certifications": "Certifications",
+    "contact": "Contact"
+  },
+  "cert": {
+    "title": "Certifications",
+    "awaiting": "Awaiting client artwork",
+    "classes": "Fire classes",
+    "agency": "ALMAGHRABI for Trading Services — authorized GENEFIRE agent in Saudi Arabia."
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "brand": {
+    "company_en": "ALMAGHRABI for Trading Services",
+    "company_ar": "المغربي للخدمات التجارية",
+    "role_en": "Authorized Agent in Saudi Arabia",
+    "role_ar": "الوكيل المعتمد في المملكة العربية السعودية",
+    "principal": "GENEFIRE — Aerosol Fire Suppression Systems",
+    "tagline_en": "Where Innovation Meets Fire Safety",
+    "tagline_ar": "حيث يلتقي الابتكار بالسلامة من الحرائق",
+    "address_en": "Riyadh – Othman Bin Affan Road – Al Nuzha District",
+    "address_ar": "الرياض - طريق عثمان بن عفان - حي النزهة",
+    "phones": ["0548618668", "0548281779"],
+    "email": "info@almaghrabi-trading.com",
+    "palette": {
+      "fire_red": "#E1251B",
+      "deep_red": "#B01712",
+      "ink": "#0E0F11",
+      "graphite": "#2A2D31",
+      "steel": "#C9CDD2",
+      "gold": "#B08A3E",
+      "paper": "#FFFFFF"
+    },
+    "certifications": ["ISO", "SGS", "CE", "Eco-Friendly", "Green Product"],
+    "fire_classes": ["A", "B", "C", "E", "F"],
+    "applications_en": ["Military", "Industry", "Power", "Railway", "Data Centers", "Laboratory"],
+    "applications_ar": ["المعدات العسكرية", "الصناعة", "الطاقة", "السكك الحديدية", "مراكز البيانات", "المختبرات"]
+  },
+  "design_rule": {
+    "coverage_per_gram_m3": 0.05,
+    "note": "GENEFIRE AGC agent protects exactly 5 m³ per 100 g across the entire range. Used to validate the brochure figures."
+  },
+  "series": [
+    {
+      "id": "px",
+      "name_en": "PX Series",
+      "name_ar": "سلسلة PX",
+      "sub_en": "Manual activation, instant protection",
+      "sub_ar": "تشغيل يدوي وحماية فورية",
+      "products": [
+        {"id":"px1m","name":"PX1M","form":"tube_capped","agc_g":100,"total_g":200,"volume_m3":5,"time_s":50,"length_mm":200,"dia_mm":35,"finish":"red_anodized","accent":"carbon_black","has_cap":true},
+        {"id":"px1e","name":"PX1E","form":"tube_grip","agc_g":100,"total_g":360,"volume_m3":5,"time_s":50,"length_mm":340,"dia_mm":32,"finish":"red_anodized","accent":"black_grip","has_cap":false},
+        {"id":"px5","name":"PX 5","form":"handheld","agc_g":500,"total_g":1340,"volume_m3":25,"time_s":40,"length_mm":300,"dia_mm":160,"finish":"red_polymer","accent":"black_polymer","has_cap":false,
+         "note_en":"Advanced aerosol fire suppression technology in a high-performance handheld fire extinguisher.",
+         "note_ar":"تقنية متقدمة في إطفاء الحرائق بالهباء الجوي ضمن مطفأة يدوية عالية الكفاءة."}
+      ]
+    },
+    {
+      "id": "sx_small",
+      "name_en": "Small-Scale Series",
+      "name_ar": "سلسلة الحماية للمساحات الصغيرة",
+      "sub_en": "Scalable protection for electrical cabinets & enclosures",
+      "sub_ar": "حماية مرنة وقابلة للتوسع للوحات والخزائن الكهربائية",
+      "products": [
+        {"id":"sx5_10","name":"SX 5/10","form":"bar","agc_g":[5,10],"total_g":[52,57],"volume_m3":[0.25,0.5],"time_s":[10,15],"length_mm":115,"dia_mm":19,"section":"square","finish":"red_anodized","accent":"black_polymer"},
+        {"id":"sx25","name":"SX 25","form":"tube_nozzle","agc_g":25,"total_g":72,"volume_m3":1.25,"time_s":14,"length_mm":132,"dia_mm":32,"finish":"red_anodized","accent":"black_polymer"},
+        {"id":"sx50","name":"SX 50","form":"tube_nozzle","agc_g":50,"total_g":113,"volume_m3":2.5,"time_s":27,"length_mm":162,"dia_mm":32,"finish":"red_anodized","accent":"black_polymer"},
+        {"id":"sx100","name":"SX 100","form":"tube_nozzle","agc_g":100,"total_g":425,"volume_m3":5,"time_s":50,"length_mm":227,"dia_mm":32,"finish":"red_anodized","accent":"black_polymer",
+         "brochure_typo":"Printed sheet reads VOLUME 50 m³; the 0.05 m³/g rule that holds across every other SKU gives 5 m³. Confirm with GENEFIRE before publishing."}
+      ]
+    },
+    {
+      "id": "sx_industrial",
+      "name_en": "Industrial Series",
+      "name_ar": "السلسلة الصناعية",
+      "sub_en": "Stainless-steel fire protection for large enclosures",
+      "sub_ar": "أنظمة إطفاء من الفولاذ المقاوم للصدأ للمساحات الكبيرة",
+      "products": [
+        {"id":"sx300","name":"SX 300","form":"canister_bracket","agc_g":300,"total_g":825,"volume_m3":15,"time_s":24,"length_mm":183,"dia_mm":94,"finish":"stainless","accent":"black_polymer","bracket":true},
+        {"id":"sx500","name":"SX 500","form":"canister_bracket","agc_g":500,"total_g":1025,"volume_m3":25,"time_s":35,"length_mm":215,"dia_mm":94,"finish":"stainless","accent":"black_polymer","bracket":true,
+         "brochure_typo":"Printed sheet reads AGC 300 g; 25 m³ coverage at the range-wide 0.05 m³/g rule gives 500 g, which also matches the model name. Confirm with GENEFIRE before publishing."},
+        {"id":"sx750","name":"SX 750","form":"canister_bracket","agc_g":750,"total_g":1265,"volume_m3":37.5,"time_s":48,"length_mm":245,"dia_mm":94,"finish":"stainless","accent":"black_polymer","bracket":true},
+        {"id":"sx1500","name":"SX 1500","form":"canister_wide","agc_g":1500,"total_g":2630,"volume_m3":75,"time_s":35,"length_mm":215,"dia_mm":180,"finish":"stainless","accent":"black_polymer","bracket":true}
+      ]
+    }
+  ],
+  "advantages": [
+    {"en":"Low Cost","ar":"اقتصادي وفعال من حيث التكلفة"},
+    {"en":"Non-Damaging","ar":"لا يسبب أضراراً للمعدات"},
+    {"en":"Convenient","ar":"سهل الاستخدام"},
+    {"en":"Eco-Friendly","ar":"صديق للبيئة"},
+    {"en":"Cooler Aerosol","ar":"هباء جوي منخفض الحرارة"},
+    {"en":"Efficient","ar":"كفاءة عالية في الإطفاء"},
+    {"en":"Versatile","ar":"متعدد الاستخدامات"},
+    {"en":"Safe","ar":"آمن للاستخدام"}
+  ],
+  "eco_claims": [
+    {"en":"Zero ozone depletion potential","ar":"لا يؤثر على طبقة الأوزون"},
+    {"en":"Zero global warming potential","ar":"لا يسهم في ظاهرة الاحتباس الحراري"},
+    {"en":"Zero atmospheric life","ar":"لا يترك أثراً طويل الأمد في الغلاف الجوي"},
+    {"en":"Does not displace oxygen","ar":"لا يتسبب في إزاحة الأكسجين"},
+    {"en":"Does not emit toxic substances","ar":"لا يطلق مواد سامة"},
+    {"en":"Safe for humans","ar":"آمن للاستخدام في الأماكن المأهولة"}
+  ],
+  "key_features": [
+    {"en":"Rapid Fire Suppression","ar":"إخماد سريع للحرائق"},
+    {"en":"Safe for People and Equipment","ar":"آمن للأفراد والمعدات"},
+    {"en":"Environmentally Friendly","ar":"صديق للبيئة"},
+    {"en":"Easy to Install & Maintain","ar":"سهل التركيب والصيانة"},
+    {"en":"Compact & Lightweight","ar":"صغير الحجم وخفيف الوزن"},
+    {"en":"Cost-Effective Solution","ar":"حل اقتصادي وفعال"}
+  ]
+}

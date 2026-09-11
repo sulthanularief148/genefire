@@ -1,0 +1,1531 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Pointer parallax offsets, written per element by PointerParallax. Registered as
+  NON-INHERITING: an unregistered custom property inherits, so every child of a
+  drifting element would read its parent's offset and drift a second time.
+*/
+@property --px {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --py {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/*
+  Logical properties only. Any physical box-model rule in this file is a bug — see
+  .claude/skills/arabic-rtl-bilingual/SKILL.md and `npm run check:rtl`.
+*/
+
+@layer base {
+  :root {
+    --font-size-base: 16px;
+    --lh: 1.55;
+
+    /* Palette mirrors assets/products.json → brand.palette, exposed for the 3D
+       scene and for gradients Tailwind cannot express. */
+    --fire-red: theme('colors.fire');
+    --deep-red: theme('colors.deep-red');
+    --ink: theme('colors.ink');
+    --graphite: theme('colors.graphite');
+    --steel: theme('colors.steel');
+    --gold: theme('colors.gold');
+    --paper: theme('colors.paper');
+
+    /* +1 in LTR, -1 in RTL. Multiply any transform that must follow the reading
+       direction — transforms do not flip with `dir`. */
+    --dir: 1;
+
+    color-scheme: dark;
+  }
+
+  [dir='rtl'] {
+    --dir: -1;
+  }
+
+  /* The ground colour lives on <html>, not <body>.
+     `color-scheme: dark` gives the root a UA background, which stops the body's
+     background propagating to the viewport. The body then paints its own opaque
+     background as an ordinary element — directly over the fixed -z-10 canvas,
+     which hides the entire scene. Painting the ground on the root and leaving the
+     body transparent is what keeps the canvas visible behind the page. */
+  html {
+    font-size: var(--font-size-base);
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--ink);
+
+    /*
+      THE GROUND. Cool charcoal at the top, --ink through the middle, a warm ember
+      lift along the bottom edge.
+
+      It lives here rather than in the scene because the canvas runs alpha:true —
+      the page IS the scene's background, so a gradient on the root shows through
+      the 3D and puts the products in a space instead of on a flat field. Flat
+      #0E0F11 read as "nobody has styled this yet".
+
+      background-attachment: fixed maps it to the VIEWPORT, not to the document.
+      On a page this tall a document-height gradient would be a few pixels of
+      transition somewhere the reader never is.
+    */
+    background-image:
+      radial-gradient(120% 75% at 50% 0%, rgba(190, 205, 230, 0.05) 0%, transparent 62%),
+      radial-gradient(90% 55% at 50% 100%, rgba(225, 37, 27, 0.09) 0%, transparent 72%),
+      linear-gradient(180deg, #14161c 0%, var(--ink) 42%, #16110f 100%);
+    background-attachment: fixed;
+  }
+
+  /*
+    Vignette, over the canvas and under the copy.
+    z-index sits between the canvas (-10) and the content, so it settles the frame
+    edges without dimming a single word of text.
+  */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -5;
+    pointer-events: none;
+    background: radial-gradient(
+      118% 88% at 50% 45%,
+      transparent 45%,
+      rgba(0, 0, 0, 0.34) 82%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+  }
+
+  /* Arabic needs ~6% more size for the same optical weight, and the room for
+     ascenders, descenders and diacritics. */
+  [lang='ar'] {
+    font-size: 1.06em;
+    line-height: 1.85;
+    letter-spacing: 0;
+  }
+
+  [lang='en'] {
+    line-height: var(--lh);
+  }
+
+  /* Transparent: the canvas sits behind this and the root carries the ground.
+     The canvas runs alpha:true, so --ink IS the scene ground and any scene fog
+     must be set to the same value or geometry stops dissolving into the horizon.
+     One dark, one token. */
+  body {
+    background-color: transparent;
+    color: var(--paper);
+    font-family: var(--font-latin), system-ui, sans-serif;
+    text-align: start;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Arabic first, then Inter for any Latin character the Arabic face is not
+     subset for — model numbers, GENEFIRE, ISO. Different script, different type. */
+  [lang='ar'] body {
+    font-family: var(--font-ar), var(--font-latin), system-ui, sans-serif;
+  }
+
+  /* Arabic has no small caps, no italics, and cursive joining that letter-spacing
+     and uppercasing destroy. Neutralise both wherever a Latin-first utility lands
+     on Arabic text. */
+  /* The technical face is a Latin face; Arabic labels stay in the Arabic one. */
+  [lang='ar'] .eyebrow,
+  [lang='ar'] .spec-label {
+    font-family: var(--font-ar), system-ui, sans-serif;
+  }
+
+  [lang='ar'] .eyebrow,
+  [lang='ar'] .uppercase {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  [lang='ar'] .display {
+    font-weight: 700;
+  }
+
+  /* Latin brand names and model numbers sitting inside Arabic keep Latin type and
+     LTR order: <bdi>SX 300</bdi>. */
+  [lang='ar'] bdi,
+  [lang='ar'] [dir='ltr'] {
+    font-family: var(--font-latin), system-ui, sans-serif;
+  }
+
+  ::selection {
+    background-color: var(--fire-red);
+    color: var(--paper);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+
+  /* The canvas is illustration. Every headline, spec and product name also exists
+     as real DOM text, so the scene is never in the accessibility tree. */
+  canvas {
+    touch-action: pan-y;
+  }
+}
+
+@layer components {
+  /*
+    Eyebrows are GOLD and set in the technical face.
+
+    Gold #B08A3E is the Almaghrabi mark's own colour and measures 5.98:1 on ink,
+    so it is the one accent that carries small text on this ground. It was being
+    used exactly once on the whole site while every label defaulted to grey.
+  */
+  .eyebrow {
+    @apply font-mono text-eyebrow uppercase text-gold;
+  }
+
+  /*
+    Hairline rules, gold at low alpha.
+
+    A pure --graphite rule is invisible against the ground at 1px; a gold-tinted
+    one reads as a drawn line and ties the rules to the accent without shouting.
+    color-mix keeps the relationship to the token rather than freezing a hex.
+  */
+  .hairline {
+    border-color: color-mix(in srgb, var(--gold) 30%, transparent);
+  }
+
+  /*
+    Figures. Tabular, so a column of numbers lines up on the decimal and does not
+    reflow as the digits change between products.
+  */
+  .figure {
+    @apply font-mono;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+
+  /*
+    RED POLICY — measured, not assumed.
+
+                    on paper #FFFFFF   on ink #0E0F11
+      fire_red      4.69  AA body      4.09  large / UI only
+      deep_red      7.05  AA body      2.72  fails everything
+      gold          3.21  fails         5.98  AA body
+
+    Most of this site is the dark ground, where NEITHER red carries small text.
+    So:
+      .text-red-on-light  deep_red, light grounds only — body copy is fine
+      .display-red        fire_red, display type only: ≥24px, or ≥18.66px bold
+      .text-accent-on-dark gold, for small accent text on dark
+
+    Arabic is stricter than WCAG here. The large-text exemption is calibrated on
+    Latin letterforms; Arabic at the same pixel size has thinner strokes plus dots
+    and diacritics that carry meaning, so a 4.09:1 red heading that reads in
+    English is genuinely marginal in Arabic. Red is never Arabic body text, and
+    Arabic red headings are bold and ≥28px — enforced below. The brochure already
+    works this way: red headings, black or white body.
+
+    If small red text on dark is ever genuinely required, #EA4032 measures 4.82:1
+    there. Add it as a token at that point, not before.
+  */
+  .text-red-on-light {
+    color: var(--deep-red);
+  }
+
+  .display-red {
+    color: var(--fire-red);
+    font-size: max(1.5rem, 1em); /* 24px floor — below this the ratio fails */
+    font-weight: 600;
+  }
+
+  [lang='ar'] .display-red {
+    font-size: max(1.75rem, 1em); /* 28px floor for Arabic */
+    font-weight: 700;
+  }
+
+  .text-accent-on-dark {
+    color: var(--gold);
+  }
+
+  /*
+    Beat reveals. A pinned section writes data-beat as its scrub crosses each
+    threshold, and copy lifts in when its own beat is reached. Doing it in CSS
+    rather than React means the section can scrub at 60 fps without a single
+    re-render, and it reverses for free when the user drags backwards.
+
+    The text is always in the DOM — only opacity and a small offset animate — so
+    every line stays selectable, findable with Ctrl+F, and present in the
+    accessibility tree regardless of scroll position.
+
+    A beat reveal is a LIFT, not an appearance out of nothing.
+
+    This idled at opacity 0.12, which measured 78 distinct text styles below
+    4.5:1 against the page ground — the whole site read as dark grey on
+    near-black. The intent was "reveal on beat"; the effect was "hide the copy".
+    0.9 still reads as a soft arrival while keeping every colour above its
+    designed contrast: steel lands around 10:1 and gold around 5.2:1 even idle.
+  */
+  /*
+    SECTION PARALLAX.
+
+    Copy drifts up slightly faster than the camera pulls the product back, so the
+    two planes separate as the reader scrolls. --section-progress is published per
+    frame by PinnedSection.
+
+    The differential is deliberately small. Over a 200vh pin the copy travels
+    about 1.5rem while the product travels the whole camera move; that is roughly
+    a tenth of the section's own motion, inside the 5-15% band. Larger and the
+    layers stop reading as depth and start reading as two slides sliding past each
+    other, which is the exact failure the small number is guarding against.
+
+    Applied to [data-anim] — the elements the section already marks as its own
+    animated copy — so nothing structural moves and no pinned height changes.
+  */
+  /*
+    The beat offset is a VARIABLE, not a transform.
+
+    Two things want to move these elements: the beat reveal, which lifts copy
+    0.5rem as it arrives, and the section parallax below, which drifts it against
+    the camera for the length of the pin. Written as two transform rules they do
+    not compose — the more specific selector simply wins and the other effect
+    disappears — so both contribute to one translate instead.
+  */
+  .beat {
+    --beat-y: 0.5rem;
+    opacity: 0.9;
+    transition:
+      opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /*
+    The exception: copy that must be genuinely ABSENT until its beat, because
+    showing it early gives away the argument the animation is making — the
+    activation line at 0.80, the exploded-view hotspots at 0.55. Hidden is not a
+    contrast failure; it stays in the DOM, in the accessibility tree, and
+    findable with Ctrl+F.
+  */
+  .beat-veiled {
+    opacity: 0;
+  }
+
+  [data-beat='0'] .beat-0,
+  [data-beat='1'] .beat-0,
+  [data-beat='1'] .beat-1,
+  [data-beat='2'] .beat-0,
+  [data-beat='2'] .beat-1,
+  [data-beat='2'] .beat-2,
+  [data-beat='3'] .beat-0,
+  [data-beat='3'] .beat-1,
+  [data-beat='3'] .beat-2,
+  [data-beat='4'] .beat-4 {
+    opacity: 1;
+    --beat-y: 0rem;
+  }
+
+  /* Veiled copy only becomes visible at its own beat, never before.
+
+     EXCLUSIVE, unlike the cumulative rules above: a veiled block shows on its own
+     beat and on no other. That is what a stack of alternatives needs — section 04
+     lays its three series in the same place and cross-fades between them, so any
+     rule that keeps an earlier one visible draws all three at once.
+
+     The re-veil below is what makes "exclusive" true. The cumulative rules are
+     `[data-beat='1'] .beat-0` — an attribute and a class, (0,2,0) — and the plain
+     `.beat-veiled` hide is (0,1,0), so the cumulative rule won: at beat 1 the PX
+     and Small-Scale blocks both drew, at beat 2 all three did, one on top of the
+     other. Hiding veiled copy at the same (0,2,0), after the cumulative rules,
+     leaves only the (0,3,0) exclusive rules able to show it. */
+  [data-beat] .beat-veiled {
+    opacity: 0;
+  }
+
+  [data-beat='0'] .beat-veiled.beat-0,
+  [data-beat='1'] .beat-veiled.beat-1,
+  [data-beat='2'] .beat-veiled.beat-2,
+  [data-beat='3'] .beat-veiled.beat-3,
+  [data-beat='4'] .beat-veiled.beat-4,
+  /* The activation line is the exception: written at beat 2, it stays through 3. */
+  [data-beat='3'] .beat-veiled.beat-2 {
+    opacity: 1;
+  }
+
+  /*
+    A stack of alternatives: children occupy the same box and only one is shown.
+
+    ONE GRID CELL, not absolute positioning. Absolutely positioned children have no
+    height, so the stack collapsed to nothing and whatever followed it — the series
+    tabs — had to guess where the tallest card ended. A shared grid area gives the
+    stack the height of its tallest child and lets everything after it flow.
+
+    With every child in the same place, one wrong opacity rule draws them on top of
+    one another; see the re-veil rule above for the time that happened.
+  */
+  .beat-stack {
+    display: grid;
+  }
+
+  .beat-stack > * {
+    grid-area: 1 / 1;
+  }
+
+  /* The card that is showing takes the pointer; the hidden ones never do. */
+  .beat-stack > .beat-veiled {
+    pointer-events: none;
+  }
+
+  [data-beat='0'] .beat-stack > .beat-0,
+  [data-beat='1'] .beat-stack > .beat-1,
+  [data-beat='2'] .beat-stack > .beat-2 {
+    pointer-events: auto;
+  }
+
+  /*
+    Under reduced motion there is no cross-fade, and every beat is shown at once —
+    so the children must leave the stack and flow, or the reader gets three
+    headings drawn over each other with no way to separate them.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .beat-stack {
+      display: block;
+    }
+
+    .beat-stack > * + * {
+      margin-block-start: 3rem;
+    }
+
+    .beat-stack > .beat-veiled {
+      pointer-events: auto;
+    }
+  }
+
+  /*
+    SECTION 04 — the series card arrives from the reading direction, and its rows
+    follow one after another. Only while the card is the one showing; hidden cards
+    sit back at their offset, ready to come in again.
+  */
+  .series-card {
+    --beat-y: 1rem;
+  }
+
+  .series-row {
+    opacity: 0;
+    transform: translate3d(calc(var(--dir) * 0.75rem), 0, 0);
+    transition:
+      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-beat='0'] .beat-0 .series-row,
+  [data-beat='1'] .beat-1 .series-row,
+  [data-beat='2'] .beat-2 .series-row {
+    opacity: 1;
+    transform: none;
+  }
+
+  .series-row:nth-child(2) {
+    transition-delay: 70ms;
+  }
+
+  .series-row:nth-child(3) {
+    transition-delay: 140ms;
+  }
+
+  .series-row:nth-child(4) {
+    transition-delay: 210ms;
+  }
+
+  .series-row:nth-child(5) {
+    transition-delay: 280ms;
+  }
+
+  /*
+    The tabs: every series reached so far has its bar filled — a progress bar in
+    three segments — and the one showing has its name lit. The bar grows from the
+    inline-start edge, which transform-origin cannot say logically, hence the
+    [dir] pair.
+  */
+  .series-tab {
+    opacity: 0.55;
+    transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .series-tab-bar {
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [dir='rtl'] .series-tab-bar {
+    transform-origin: 100% 50%;
+  }
+
+  [data-beat='0'] .series-tab[data-i='0'],
+  [data-beat='1'] .series-tab[data-i='1'],
+  [data-beat='2'] .series-tab[data-i='2'] {
+    opacity: 1;
+  }
+
+  [data-beat='0'] .series-tab[data-i='0'] .series-tab-bar,
+  [data-beat='1'] .series-tab[data-i='0'] .series-tab-bar,
+  [data-beat='1'] .series-tab[data-i='1'] .series-tab-bar,
+  [data-beat='2'] .series-tab .series-tab-bar {
+    transform: scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .series-row {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Reduced motion shows every beat at once — the section is a block of readable
+     content in normal flow, not a timeline. */
+  @media (prefers-reduced-motion: reduce) {
+    .beat,
+    .beat-veiled,
+    [data-beat] .beat-veiled {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /*
+    Section 07 labels. The pinned section carries data-beat = the index of the
+    environment currently facing front, so which label is lit is CSS, not React —
+    the drum can turn at 60fps without a single re-render.
+
+    Wide: every name is listed, the active one lifts to full contrast.
+    Narrow: one name at a time, the rest reduced to position markers, because six
+    Arabic environment names on a 375px screen wrap into a wall of text.
+  */
+  /* Non-active environment names stay legible: 0.6 keeps steel near 5.3:1. */
+  [data-anim] {
+    transform: translate3d(
+      0,
+      calc(var(--beat-y, 0rem) + var(--section-progress, 0) * -1.5rem),
+      0
+    );
+  }
+
+  /* The parallax is motion for its own sake; reduced motion gets none of it, and
+     the beat offset resolves to zero because the beats are all revealed. */
+  @media (prefers-reduced-motion: reduce) {
+    [data-anim] {
+      transform: none;
+    }
+  }
+
+  .env-label {
+    opacity: 0.6;
+    transition:
+      opacity 400ms cubic-bezier(0.22, 1, 0.36, 1),
+      color 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .env-name {
+    display: none;
+  }
+
+  .env-marker {
+    transition: background-color 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-beat='0'] .env-label[data-env='0'],
+  [data-beat='1'] .env-label[data-env='1'],
+  [data-beat='2'] .env-label[data-env='2'],
+  [data-beat='3'] .env-label[data-env='3'],
+  [data-beat='4'] .env-label[data-env='4'],
+  [data-beat='5'] .env-label[data-env='5'],
+  [data-beat='6'] .env-label[data-env='5'] {
+    opacity: 1;
+    color: var(--paper);
+  }
+
+  [data-beat='0'] .env-name[data-env='0'],
+  [data-beat='1'] .env-name[data-env='1'],
+  [data-beat='2'] .env-name[data-env='2'],
+  [data-beat='3'] .env-name[data-env='3'],
+  [data-beat='4'] .env-name[data-env='4'],
+  [data-beat='5'] .env-name[data-env='5'],
+  [data-beat='6'] .env-name[data-env='5'] {
+    display: inline;
+  }
+
+  [data-beat='0'] .env-marker[data-env='0'],
+  [data-beat='1'] .env-marker[data-env='1'],
+  [data-beat='2'] .env-marker[data-env='2'],
+  [data-beat='3'] .env-marker[data-env='3'],
+  [data-beat='4'] .env-marker[data-env='4'],
+  [data-beat='5'] .env-marker[data-env='5'],
+  [data-beat='6'] .env-marker[data-env='5'] {
+    background-color: var(--gold);
+  }
+
+  /* No data-beat yet, or reduced motion: show the first name rather than none. */
+  #applications:not([data-beat]) .env-name[data-env='0'] {
+    display: inline;
+  }
+
+  /*
+    SECTION 01 — two beats, keyed on the pinned section's own data-beat.
+
+    The copy is VISIBLE BY DEFAULT and hidden from beat 1: the headline is the LCP
+    element, and it has to paint before GSAP has loaded and written any beat at
+    all. The name-and-figures layer is the other way round — absent until beat 2,
+    because showing it early would put it on top of the headline.
+
+    Discrete transitions rather than a scrub: the move between the two is a state
+    change the camera is making at the same time, and a 700 ms ease reads as
+    deliberate where a copy fade dragged along by the scrollbar reads as a slider.
+  */
+  .hero-copy {
+    transition:
+      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  #hero[data-beat='1'] .hero-copy,
+  #hero[data-beat='2'] .hero-copy {
+    opacity: 0;
+    transform: translate3d(0, -1.75rem, 0);
+  }
+
+  .hero-spec {
+    opacity: 0;
+    transform: translate3d(0, 1.25rem, 0);
+    transition:
+      opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  #hero[data-beat='2'] .hero-spec {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The figures arrive one after another, after the name. */
+  .hero-figures > * {
+    opacity: 0;
+    transform: translate3d(0, 0.75rem, 0);
+    transition:
+      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  #hero[data-beat='2'] .hero-figures > * {
+    opacity: 1;
+    transform: none;
+  }
+
+  #hero[data-beat='2'] .hero-figures > :nth-child(1) {
+    transition-delay: 120ms;
+  }
+
+  #hero[data-beat='2'] .hero-figures > :nth-child(2) {
+    transition-delay: 220ms;
+  }
+
+  #hero[data-beat='2'] .hero-figures > :nth-child(3) {
+    transition-delay: 320ms;
+  }
+
+  /* Reduced motion: no beats. Everything is shown, in flow, at once — the section
+     is a block of readable content, not a timeline. PinnedSection writes the last
+     beat under reduced motion, so this has to win over the rules above. */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-copy,
+    .hero-spec,
+    .hero-figures > *,
+    #hero[data-beat] .hero-copy {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /*
+    The headline's second half, lit.
+
+    Ember into the brand red, running in the reading direction. Display type only
+    and bold in Arabic, per the red policy above: fire_red is 4.09:1 on ink, which
+    carries a ≥24px heading and nothing smaller, and the ember end is lighter
+    still. The gradient follows --dir so Arabic reads from the same warm end.
+  */
+  .hero-accent {
+    /* Twice the width of the text, so the one sweep on first paint has somewhere
+       to travel from: a band of light crosses the phrase and settles on the same
+       ember-to-red it holds for the rest of the visit. */
+    background-image: linear-gradient(
+      calc(var(--dir) * 90deg),
+      #ff8a4c 0%,
+      #ff5a36 22%,
+      var(--fire-red) 50%,
+      #ffb07a 62%,
+      #ff8a4c 74%,
+      var(--fire-red) 100%
+    );
+    background-size: 200% 100%;
+    background-position: 0% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    animation: hero-sweep 2200ms cubic-bezier(0.22, 1, 0.36, 1) 500ms backwards;
+  }
+
+  [dir='rtl'] .hero-accent {
+    background-position: 100% 0;
+    animation-name: hero-sweep-rtl;
+  }
+
+  @keyframes hero-sweep {
+    from {
+      background-position: 100% 0;
+    }
+  }
+
+  @keyframes hero-sweep-rtl {
+    from {
+      background-position: 0% 0;
+    }
+  }
+
+  /* Forced colours drop background images, and transparent text on no background
+     is no text at all. */
+  @media (forced-colors: active) {
+    .hero-accent {
+      background-image: none;
+      color: CanvasText;
+    }
+  }
+
+  /* A bead of light running down a hairline: "there is more below", without an
+     arrow. Reduced motion stops it via the global animation rule. */
+  .scroll-cue-dot {
+    animation: scroll-cue 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
+  @keyframes scroll-cue {
+    0% {
+      transform: translate3d(0, -100%, 0);
+    }
+    70%,
+    100% {
+      transform: translate3d(0, 340%, 0);
+    }
+  }
+
+  /*
+    The nav has no bar of its own, so in the sections that scroll normally —
+    coverage, comparison, contact — the copy slid up underneath it and the two
+    read on top of each other. A fade from the page ground behind the nav settles
+    anything passing under it, without drawing a bar across the hero.
+  */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 0;
+    block-size: 7rem;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--ink) 92%, transparent) 0%,
+      color-mix(in srgb, var(--ink) 70%, transparent) 45%,
+      transparent 100%
+    );
+  }
+
+  /*
+    GRAB-TO-TURN — see components/scroll/GrabZone. An invisible area over a 3D
+    subject: grab, then grabbing. Horizontal drags only — `pan-y` hands vertical
+    movement back to the browser so a phone still scrolls.
+  */
+  .grab-zone {
+    position: absolute;
+    z-index: 5;
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .grab-zone[data-held] {
+    cursor: grabbing;
+  }
+
+  /* The hint: until the first drag, then gone for good. */
+  .grab-hint {
+    position: absolute;
+    inset-block-end: 6%;
+    inset-inline-start: 50%;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.85rem 0.4rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+    background: color-mix(in srgb, var(--ink) 70%, transparent);
+    backdrop-filter: blur(6px);
+    font-size: 0.75rem;
+    color: var(--steel);
+    white-space: nowrap;
+    transform: translateX(calc(var(--dir) * -50%));
+    transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  /* The hero's hint has done its job by the time the reader scrolls: from beat 1
+     the product is being named and measured, and the pill sat on top of it. */
+  #hero[data-beat='1'] .grab-hint,
+  #hero[data-beat='2'] .grab-hint {
+    opacity: 0;
+  }
+
+  .grab-hint-icon {
+    position: relative;
+    display: block;
+    inline-size: 1.4rem;
+    block-size: 0.75rem;
+  }
+
+  /* Two chevrons either side of a dot that sways between them — "left and right". */
+  .grab-hint-icon::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: 0.4rem;
+    block-size: 0.4rem;
+    border-radius: 50%;
+    background: var(--gold);
+    translate: -50% -50%;
+    animation: grab-sway 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  .grab-hint-icon::after {
+    content: '‹ ›';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--gold) 70%, transparent);
+    letter-spacing: 0.35rem;
+    direction: ltr;
+  }
+
+  @keyframes grab-sway {
+    0%,
+    100% {
+      transform: translateX(-0.35rem);
+    }
+    50% {
+      transform: translateX(0.35rem);
+    }
+  }
+
+  .grab-zone[data-used] .grab-hint {
+    opacity: 0;
+  }
+
+  /* The hero's drag area sits under the copy; once the copy has cleared it must
+     not keep catching the pointer over the product. */
+  #hero[data-beat='1'] .hero-copy,
+  #hero[data-beat='2'] .hero-copy {
+    pointer-events: none;
+  }
+
+  /*
+    FORM PARTS, shared by the calculator and the contact form: one field style,
+    one glass panel, one primary button, one slider.
+  */
+  .field {
+    border-radius: 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--steel) 22%, transparent);
+    background: color-mix(in srgb, var(--ink) 55%, transparent);
+    padding: 0.75rem 0.9rem;
+    color: var(--paper);
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      background-color 200ms ease;
+  }
+
+  .field:hover {
+    border-color: color-mix(in srgb, var(--steel) 40%, transparent);
+  }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
+    background: color-mix(in srgb, var(--ink) 75%, transparent);
+  }
+
+  .glass-panel {
+    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--gold) 20%, transparent);
+    background:
+      linear-gradient(160deg, color-mix(in srgb, #ffffff 4%, transparent), transparent 40%),
+      color-mix(in srgb, var(--ink) 72%, transparent);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.9);
+  }
+
+  .btn-primary {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--fire-red);
+    padding: 0.85rem 1.6rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--paper);
+    transition:
+      transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 300ms ease,
+      background-color 200ms ease;
+    box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--fire-red) 70%, transparent);
+  }
+
+  /* A band of light crossing the button on hover. */
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inline-size: 40%;
+    inset-inline-start: -50%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+    transform: skewX(-18deg);
+    transition: inset-inline-start 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    background: var(--deep-red);
+    box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--fire-red) 80%, transparent);
+  }
+
+  .btn-primary:hover::after {
+    inset-inline-start: 120%;
+  }
+
+  .range {
+    appearance: none;
+    -webkit-appearance: none;
+    block-size: 1.25rem;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .range::-webkit-slider-runnable-track {
+    block-size: 2px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--steel) 30%, transparent);
+  }
+
+  .range::-moz-range-track {
+    block-size: 2px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--steel) 30%, transparent);
+  }
+
+  .range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    margin-block-start: -7px;
+    inline-size: 16px;
+    block-size: 16px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 22%, transparent);
+    transition: transform 150ms ease;
+  }
+
+  .range::-moz-range-thumb {
+    inline-size: 16px;
+    block-size: 16px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 22%, transparent);
+  }
+
+  .range:active::-webkit-slider-thumb {
+    transform: scale(1.2);
+  }
+
+  /* CONTACT */
+  .contact-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border-radius: 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--steel) 14%, transparent);
+    background: color-mix(in srgb, var(--ink) 60%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 1rem 1.1rem;
+    transition:
+      border-color 300ms ease,
+      transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .contact-card:hover {
+    border-color: color-mix(in srgb, var(--gold) 40%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .contact-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: 999px;
+    color: var(--gold);
+    background: color-mix(in srgb, var(--gold) 12%, transparent);
+  }
+
+  .contact-link {
+    color: var(--paper);
+    transition: color 200ms ease;
+  }
+
+  .contact-link:hover {
+    color: var(--gold);
+  }
+
+  /* The coverage room's dimension labels, drawn in the canvas layer. */
+  .room-label {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+    background: color-mix(in srgb, var(--ink) 75%, transparent);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--paper);
+    white-space: nowrap;
+  }
+
+  /* APPLICATIONS — the fronted environment's name arrives rather than switching. */
+  .env-title {
+    animation: env-in 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes env-in {
+    from {
+      opacity: 0;
+      translate: 0 0.6rem;
+    }
+  }
+
+  /*
+    ENTRANCES for unpinned copy — see RevealObserver. Scoped to .reveal-ready, so
+    nothing is hidden until the script has run and marked what is already on
+    screen. A lift and a fade; siblings follow one another.
+  */
+  [data-reveal] {
+    transition:
+      opacity 900ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal-ready [data-reveal]:not([data-in]) {
+    opacity: 0;
+    translate: 0 1.5rem;
+  }
+
+  [data-reveal]:nth-child(2) {
+    transition-delay: 80ms;
+  }
+
+  [data-reveal]:nth-child(3) {
+    transition-delay: 160ms;
+  }
+
+  [data-reveal]:nth-child(4) {
+    transition-delay: 240ms;
+  }
+
+  [data-reveal]:nth-child(5) {
+    transition-delay: 320ms;
+  }
+
+  /*
+    ABOUT. Below 768 the section does not pin (lib/tier.ts), so PinnedSection
+    writes the last beat and the exclusive veil would hide the first card for
+    good. There the two cards leave the stack and flow, both shown — the same
+    treatment reduced motion gets.
+  */
+  @media (max-width: 767.98px) {
+    .about-stack {
+      display: block;
+    }
+
+    .about-stack > * + * {
+      margin-block-start: 3rem;
+    }
+
+    [data-beat] .about-stack > .beat-veiled {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  /* The three presences, as the globe's markers: amber dots, Riyadh the brightest. */
+  .about-node-dot {
+    background-color: color-mix(in srgb, #ff9e4f 70%, transparent);
+  }
+
+  .about-node[data-home] .about-node-dot {
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px color-mix(in srgb, #ff9e4f 45%, transparent);
+  }
+
+  .about-node,
+  .about-feature {
+    opacity: 0;
+    transform: translate3d(calc(var(--dir) * 0.75rem), 0, 0);
+    transition:
+      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-beat='1'] .about-node,
+  [data-beat='1'] .about-feature {
+    opacity: 1;
+    transform: none;
+  }
+
+  .about-node:nth-child(2) {
+    transition-delay: 120ms;
+  }
+
+  .about-node:nth-child(3) {
+    transition-delay: 240ms;
+  }
+
+  .about-feature:nth-child(n + 3) {
+    transition-delay: 200ms;
+  }
+
+  .about-feature:nth-child(n + 5) {
+    transition-delay: 300ms;
+  }
+
+  @media (prefers-reduced-motion: reduce), (max-width: 767.98px) {
+    .about-node,
+    .about-feature {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /*
+    Labels on the globe's markers — drawn by drei <Html> into the canvas layer,
+    which is aria-hidden: the same names are real text in the About section. They
+    sit above their marker, and NetworkGlobe fades them as their node turns away.
+  */
+  .globe-label-wrap {
+    direction: ltr;
+  }
+
+  .globe-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    transform: translateY(-1.9rem);
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity 200ms linear;
+  }
+
+  .globe-label-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--paper);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  }
+
+  .globe-label-place {
+    font-size: 0.6875rem;
+    color: var(--steel);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  }
+
+  .globe-label[data-home] .globe-label-name {
+    color: var(--gold);
+  }
+
+  /*
+    Nav links: a gold hairline that draws in from the inline-start edge on hover,
+    and stays drawn under the section the reader is in.
+  */
+  .nav-link {
+    position: relative;
+    padding-block: 0.25rem;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 1px;
+    background-color: var(--gold);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [dir='rtl'] .nav-link::after {
+    transform-origin: 100% 50%;
+  }
+
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after,
+  .nav-link[aria-current]::after {
+    transform: scaleX(1);
+  }
+
+  /*
+    POINTER PARALLAX for copy marked data-depth — see PointerParallax. The
+    `translate` property composes with `transform` instead of replacing it, so the
+    beat reveals and the scroll drift on the same elements are untouched. Motion
+    for its own sake: reduced motion gets none, and the script never runs there.
+  */
+  [data-depth] {
+    translate: var(--px) var(--py);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-depth] {
+      translate: none;
+    }
+  }
+
+  /*
+    First paint in the hero. The headline itself does NOT animate — it is the LCP
+    element, and anything that starts it hidden delays LCP by the length of the
+    animation. What moves is around it: the credential's gold catches the light
+    once, the accent phrase's light sweeps across once, and the sub-paragraph
+    lifts in after.
+  */
+  .hero-lift {
+    animation: hero-lift 1000ms cubic-bezier(0.22, 1, 0.36, 1) 350ms backwards;
+  }
+
+  /*
+    THE CREDENTIAL. A seal in the mark's gold — a ring with a slow bead of light
+    running round it — and the line itself set large in a gold that brightens
+    toward its middle, crossed once by a highlight on first paint.
+
+    Gold is 5.98:1 on ink; the brightest stop is lighter still, so the gradient
+    never drops the line below the plain token's contrast.
+  */
+  .hero-seal {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: 999px;
+    color: #e3c47e;
+    background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--gold) 26%, transparent), transparent 70%);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent),
+      0 0 24px -6px color-mix(in srgb, var(--gold) 60%, transparent);
+  }
+
+  .hero-seal svg {
+    inline-size: 1.45rem;
+    block-size: 1.45rem;
+  }
+
+  .hero-seal::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from 0deg, transparent 0 70%, #f4d99a 85%, transparent 100%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: seal-orbit 5s linear infinite;
+  }
+
+  @media (min-width: 768px) {
+    .hero-seal {
+      inline-size: 3.5rem;
+      block-size: 3.5rem;
+    }
+
+    .hero-seal svg {
+      inline-size: 1.8rem;
+      block-size: 1.8rem;
+    }
+  }
+
+  @keyframes seal-orbit {
+    to {
+      rotate: 1turn;
+    }
+  }
+
+  .hero-credential-text {
+    background-image: linear-gradient(
+      calc(var(--dir) * 90deg),
+      var(--gold) 0%,
+      #e9cd8c 30%,
+      #f7e3b0 42%,
+      #d4b066 58%,
+      var(--gold) 100%
+    );
+    background-size: 220% 100%;
+    background-position: 0% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    animation: hero-sweep 2400ms cubic-bezier(0.22, 1, 0.36, 1) 250ms backwards;
+  }
+
+  [dir='rtl'] .hero-credential-text {
+    background-position: 100% 0;
+    animation-name: hero-sweep-rtl;
+  }
+
+  @media (forced-colors: active) {
+    .hero-credential-text {
+      background-image: none;
+      color: CanvasText;
+    }
+  }
+
+  @keyframes hero-lift {
+    from {
+      opacity: 0;
+      translate: 0 0.75rem;
+    }
+  }
+
+  /*
+    SECTION 02 — before the first scrub writes a beat (first paint, or GSAP still
+    loading) the first statement shows rather than none, and its counter with it.
+  */
+  #problem:not([data-beat]) .beat-0 {
+    opacity: 1;
+    --beat-y: 0rem;
+  }
+
+  #problem:not([data-beat]) .env-name[data-env='0'] {
+    display: inline;
+  }
+
+  /*
+    The room's temperature: a thin bar that fills with the section, steel to fire
+    red, with a soft bloom riding its leading edge. Scale, not width, so the fill
+    is a composited transform and never a layout. Decorative only.
+  */
+  .heat-meter {
+    position: relative;
+    block-size: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--steel) 22%, transparent);
+  }
+
+  .heat-meter-tick {
+    position: absolute;
+    inset-block: -4px;
+    inline-size: 1px;
+    background: color-mix(in srgb, var(--steel) 55%, transparent);
+  }
+
+  .heat-meter-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--gold), var(--fire-red));
+    transform: scaleX(calc(0.04 + var(--section-progress, 0) * 0.96));
+    transform-origin: 0 50%;
+  }
+
+  [dir='rtl'] .heat-meter-fill {
+    background: linear-gradient(270deg, var(--gold), var(--fire-red));
+  }
+
+  [dir='rtl'] .heat-meter-fill,
+  [dir='rtl'] .heat-meter-glow {
+    transform-origin: 100% 50%;
+  }
+
+  .heat-meter-glow {
+    position: absolute;
+    inset: 0;
+    background: var(--fire-red);
+    opacity: calc(var(--section-progress, 0) * 0.5);
+    filter: blur(6px);
+    transform: scaleX(calc(0.04 + var(--section-progress, 0) * 0.96));
+    transform-origin: 0 50%;
+    animation: heat-pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes heat-pulse {
+    50% {
+      opacity: calc(var(--section-progress, 0) * 0.15);
+    }
+  }
+
+  /*
+    SECTION 03 — the unit card shows until the discharge has done its work, then
+    gives the cell to the claims. Exclusive with beat 4 in the same grid cell.
+    Reduced motion shows both, in flow (the .beat-stack rule).
+  */
+  .act-before {
+    transition:
+      opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  #activation[data-beat='4'] .act-before {
+    opacity: 0;
+    translate: 0 -0.75rem;
+    pointer-events: none;
+  }
+
+  /* The sequence as a line, filling with the scroll; each tick lights once passed. */
+  .act-timeline {
+    position: relative;
+    block-size: 2px;
+    background: color-mix(in srgb, var(--steel) 25%, transparent);
+  }
+
+  .act-timeline-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--gold), var(--fire-red));
+    transform: scaleX(var(--section-progress, 0));
+    transform-origin: 0 50%;
+  }
+
+  [dir='rtl'] .act-timeline-fill {
+    background: linear-gradient(270deg, var(--gold), var(--fire-red));
+    transform-origin: 100% 50%;
+  }
+
+  .act-timeline-tick {
+    position: absolute;
+    inset-block-start: 50%;
+    inline-size: 9px;
+    block-size: 9px;
+    margin-block-start: -4.5px;
+    margin-inline-start: -4.5px;
+    border-radius: 999px;
+    background: var(--ink);
+    border: 1px solid color-mix(in srgb, var(--steel) 60%, transparent);
+    transition:
+      background-color 300ms ease,
+      border-color 300ms ease;
+  }
+
+  #activation[data-beat='1'] .act-timeline-tick:nth-of-type(2),
+  #activation[data-beat='2'] .act-timeline-tick:nth-of-type(-n + 3),
+  #activation[data-beat='3'] .act-timeline-tick:nth-of-type(-n + 4),
+  #activation[data-beat='4'] .act-timeline-tick {
+    background: var(--fire-red);
+    border-color: var(--fire-red);
+  }
+
+  /* The three claims land one after another, each behind a gold check. */
+  .act-claim {
+    opacity: 0;
+    translate: calc(var(--dir, 1) * 1rem) 0;
+    transition:
+      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      translate 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .act-claim:nth-child(2) {
+    transition-delay: 120ms;
+  }
+
+  .act-claim:nth-child(3) {
+    transition-delay: 240ms;
+  }
+
+  #activation[data-beat='4'] .act-claim {
+    opacity: 1;
+    translate: none;
+  }
+
+  /* An SVG tick, not a rotated border: a check is not mirrored in RTL. */
+  .act-claim-mark {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--gold) 70%, transparent);
+    background: color-mix(in srgb, var(--gold) 12%, transparent);
+    color: var(--gold);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .act-claim {
+      opacity: 1;
+      translate: none;
+    }
+
+    #activation[data-beat='4'] .act-before {
+      opacity: 1;
+      translate: none;
+      pointer-events: auto;
+    }
+
+    .heat-meter-glow {
+      animation: none;
+    }
+  }
+
+  .skip-link {
+    @apply absolute z-50 m-2 rounded-sm bg-paper px-4 py-2 text-sm font-medium text-ink;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
