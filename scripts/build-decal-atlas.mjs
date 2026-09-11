@@ -30,9 +30,29 @@
  * The rectangles are written from the same layout object that positions the DOM,
  * so the coordinates in the TS file cannot drift from the pixels in the PNG.
  */
-import { chromium } from '@playwright/test'
 import sharp from 'sharp'
-import { statSync, writeFileSync } from "node:fs"
+import { existsSync, statSync, writeFileSync } from "node:fs"
+
+/* ------------------------------------------------------------ CI: keep it -- */
+
+/*
+  NOT REGENERATED ON A BUILD SERVER. Both outputs are committed, and they are the
+  correct ones: the model numbers are set in Bahnschrift, which ships with Windows.
+  A Linux build machine (Vercel) has no Chromium for Playwright — the deploy failed
+  on exactly that — and even with one it would set the numbers in a fallback face
+  and quietly commit a different-looking atlas to production.
+
+  So on CI the committed atlas is kept. Regenerate locally with `npm run
+  build:decals` and commit both files; FORCE_DECALS=1 overrides this on CI.
+*/
+const OUT_PNG = 'public/textures/decals.png'
+const OUT_TS = 'src/lib/decalAtlas.ts'
+const committed = existsSync(OUT_PNG) && existsSync(OUT_TS)
+
+if ((process.env.CI || process.env.VERCEL) && !process.env.FORCE_DECALS && committed) {
+  console.log('decals — CI build: keeping the committed atlas (' + OUT_PNG + ')')
+  process.exit(0)
+}
 
 /* ---------------------------------------------------------------- wordmark -- */
 
@@ -145,7 +165,22 @@ const html =
   '<polygon points="10,20 170,60 10,100 40,60" fill="#fff"/></svg></div>' +
   '</div></body></html>'
 
-const browser = await chromium.launch()
+// Imported here rather than at the top, so the CI path above never loads it.
+const { chromium } = await import('@playwright/test')
+
+// No browser installed (a fresh clone before `npx playwright install`): keep the
+// committed atlas rather than failing the whole build over a texture that exists.
+let browser
+try {
+  browser = await chromium.launch()
+} catch (error) {
+  if (!committed) throw error
+  console.warn(
+    'decals — no Playwright browser (' + String(error.message).split('\n')[0] +
+      '); keeping the committed atlas. Run `npx playwright install chromium` to rebuild it.',
+  )
+  process.exit(0)
+}
 const page = await browser.newPage({
   viewport: { width: ATLAS.width, height: ATLAS.height },
   deviceScaleFactor: 1,
