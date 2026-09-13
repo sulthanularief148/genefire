@@ -37,10 +37,10 @@ import { AMBER, NO_SHADOW_LAYER, rimColour } from './stageLight'
  * section; the labels here are a picture of that list, and the canvas they live in
  * is aria-hidden.
  *
- * ELEVEN DRAW CALLS: the body, the land dots, the graticule, the halo, two arcs,
- * two travelling pulses and three markers. The continents are one Points object —
- * 4 600 dots from a 2 KB bitmask (scripts/gen-globe.mjs), not a texture and not a
- * mesh.
+ * FOURTEEN DRAW CALLS: the body, the land dots, the graticule, the halo, three
+ * arcs, three travelling pulses and four markers. The continents are one Points
+ * object — 4 600 dots from a 2 KB bitmask (scripts/gen-globe.mjs), not a texture
+ * and not a mesh.
  */
 
 /** About, and again under Contact as a horizon. */

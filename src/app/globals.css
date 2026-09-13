@@ -771,6 +771,7 @@
     border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
     background: color-mix(in srgb, var(--ink) 70%, transparent);
+    -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
     font-size: 0.75rem;
     color: var(--steel);

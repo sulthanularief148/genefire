@@ -52,6 +52,10 @@ Each item below needs the client's written confirmation before publication.
       describes the company as manufacturing its systems; genefire.com was showing a
       maintenance page when this was written. The globe marks the island's centre, not a city.
       **Client to confirm the country and the wording.**
+- [ ] **GENEFIRE, Czech Republic, "Manufacturer".** GENEFIRE's own materials also identify a
+      Czech Republic manufacturing presence alongside Taiwan. No city is published, so the
+      globe marks the country's centre, same treatment as the Taiwan node.
+      **Client to confirm the country and the wording.**
 - [ ] **GeneFire India, "Regional presence".** Taken from GENEFIRE's India account,
       instagram.com/genefireindia. No city is published; the globe marks the country's centre.
       Its India phone numbers and email are deliberately NOT on this site — it is Almaghrabi's

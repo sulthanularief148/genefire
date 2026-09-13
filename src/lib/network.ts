@@ -13,6 +13,9 @@
  *   GENEFIRE, Taiwan — GENEFIRE's own site identifies the brand with Taiwan in its
  *     page titles. No city is published, so the marker sits on the island's centre
  *     and the label says the country, not a city. TO CONFIRM with the client.
+ *   GENEFIRE, Czech Republic — GENEFIRE's own materials also identify a Czech
+ *     Republic manufacturing presence alongside Taiwan. No city is published, so
+ *     the marker sits on the country's centre. TO CONFIRM with the client.
  *   GeneFire India — GENEFIRE's India account (instagram.com/genefireindia). No
  *     city is published; the marker is on the country's centre. TO CONFIRM.
  *
@@ -23,7 +26,7 @@
  * See docs/LAUNCH-CHECKLIST.md for what still needs the client's sign-off.
  */
 
-export type NetworkNodeId = 'genefire' | 'india' | 'almaghrabi'
+export type NetworkNodeId = 'genefire' | 'czech' | 'india' | 'almaghrabi'
 
 export interface NetworkNode {
   id: NetworkNodeId
@@ -37,12 +40,14 @@ export interface NetworkNode {
 
 export const NETWORK_NODES: NetworkNode[] = [
   { id: 'genefire', lat: 23.7, lon: 121.0 },
+  { id: 'czech', lat: 49.8, lon: 15.5 },
   { id: 'india', lat: 22.6, lon: 79.0 },
   { id: 'almaghrabi', lat: 24.7136, lon: 46.6753, home: true },
 ]
 
 /** From the brand to each presence. */
 export const NETWORK_ARCS: ReadonlyArray<readonly [NetworkNodeId, NetworkNodeId]> = [
+  ['genefire', 'czech'],
   ['genefire', 'india'],
   ['genefire', 'almaghrabi'],
 ]
@@ -58,10 +63,11 @@ export const GLOBE = { radius: 0.62, centreY: 1.1 } as const
  */
 export const ABOUT_BEATS = [0.45] as const
 
-/** Where the arcs draw, in section progress. Brand → India first, then → Riyadh. */
+/** Where the arcs draw, in section progress. Brand → Czech first, then → India, then → Riyadh. */
 export const ARC_WINDOWS: ReadonlyArray<readonly [number, number]> = [
-  [0.4, 0.62],
-  [0.52, 0.76],
+  [0.34, 0.56],
+  [0.46, 0.68],
+  [0.58, 0.82],
 ]
 
 /**
@@ -96,12 +102,12 @@ export function faceTowards(lat: number, lon: number): [number, number] {
 }
 
 /**
- * The region the network occupies — between Riyadh and Taiwan — which the globe
- * turns to face once the arcs are drawing. A little south of the nodes' mean
- * latitude so the northern hemisphere's land mass does not crowd the top of the
- * frame.
+ * The region the network occupies — from the Czech Republic across Riyadh to
+ * Taiwan — which the globe turns to face once the arcs are drawing. A little
+ * south of the nodes' mean latitude so the northern hemisphere's land mass does
+ * not crowd the top of the frame.
  */
-export const NETWORK_FOCUS = { lat: 18, lon: 84 } as const
+export const NETWORK_FOCUS = { lat: 20, lon: 68 } as const
 
 /** Where the globe starts: Riyadh facing the reader, with the brand to its east. */
 export const HOME_FOCUS = { lat: 22, lon: 62 } as const

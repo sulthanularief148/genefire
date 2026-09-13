@@ -157,11 +157,16 @@
       "range": "Protection per unit"
     },
     "networkTitle": "The <latin>GENEFIRE</latin> network",
-    "networkSub": "<latin>GENEFIRE</latin> is present in Taiwan and India, and is represented in Saudi Arabia by ALMAGHRABI for Trading Services, its authorized agent.",
+    "networkSub": "<latin>GENEFIRE</latin> is present in Taiwan and the Czech Republic, with a regional presence in India, and is represented in Saudi Arabia by ALMAGHRABI for Trading Services, its authorized agent.",
     "node": {
       "genefire": {
         "name": "GENEFIRE",
         "place": "Taiwan",
+        "role": "Manufacturer"
+      },
+      "czech": {
+        "name": "GENEFIRE",
+        "place": "Czech Republic",
         "role": "Manufacturer"
       },
       "india": {
